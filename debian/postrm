@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+KEYRING_PATH="/etc/apt/keyrings/prefork-packages.asc"
+LIST_PATH="/etc/apt/sources.list.d/prefork-packages.list"
+
+case "$1" in
+  purge)
+    rm -f "${LIST_PATH}" "${KEYRING_PATH}"
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,14 @@
+Source: prefork-packages
+Section: admin
+Priority: optional
+Maintainer: Lennart Betz <lbetz@prefork.de>
+Build-Depends: debhelper (>= 11)
+Standards-Version: 4.6.2
+Homepage: https://packages.private.prefork.de
+
+Package: prefork-packages
+Architecture: all
+Depends: ${misc:Depends}, ca-certificates
+Description: Repository configuration for packages.private.prefork.de
+ Installs distro-specific APT repository configuration for Debian and Ubuntu
+ and installs the prefork-packages signing key.

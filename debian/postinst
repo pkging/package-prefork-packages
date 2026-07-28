@@ -1,0 +1,81 @@
+#!/bin/sh
+
+set -e
+
+KEYRING_PATH="/usr/share/keyrings/prefork-packages.asc"
+LIST_PATH="/etc/apt/sources.list.d/prefork-packages.list"
+
+resolve_distro() {
+  ID_VALUE=""
+  ID_LIKE_VALUE=""
+  CODENAME_VALUE=""
+
+  if [ -r /etc/os-release ]; then
+    ID_VALUE="$(. /etc/os-release; printf '%s' "${ID:-}")"
+    ID_LIKE_VALUE="$(. /etc/os-release; printf '%s' "${ID_LIKE:-}")"
+    CODENAME_VALUE="$(. /etc/os-release; printf '%s' "${VERSION_CODENAME:-${UBUNTU_CODENAME:-}}")"
+  fi
+
+  if [ -z "${CODENAME_VALUE}" ] && command -v lsb_release >/dev/null 2>&1; then
+    CODENAME_VALUE="$(lsb_release -sc 2>/dev/null || true)"
+  fi
+
+  case "${ID_VALUE}" in
+    ubuntu)
+      REPO_LABEL="Ubuntu prefork-packages"
+      REPO_BASEURL="https://packages.private.prefork.de/ubuntu/"
+      ;;
+    debian)
+      REPO_LABEL="Debian prefork-packages"
+      REPO_BASEURL="https://packages.private.prefork.de/debian/"
+      ;;
+    *)
+      case " ${ID_LIKE_VALUE} " in
+        *" ubuntu "*)
+          REPO_LABEL="Ubuntu prefork-packages"
+          REPO_BASEURL="https://packages.private.prefork.de/ubuntu/"
+          ;;
+        *" debian "*)
+          REPO_LABEL="Debian prefork-packages"
+          REPO_BASEURL="https://packages.private.prefork.de/debian/"
+          ;;
+        *)
+          echo "Unsupported distro for prefork-packages: ID=${ID_VALUE:-unknown}" >&2
+          exit 1
+          ;;
+      esac
+      ;;
+  esac
+
+  if [ -z "${CODENAME_VALUE}" ]; then
+    echo "Could not determine distro codename for prefork-packages" >&2
+    exit 1
+  fi
+
+  REPO_CODENAME="${CODENAME_VALUE}"
+}
+
+write_repo() {
+  if [ ! -r "${KEYRING_PATH}" ]; then
+    echo "Missing keyring file: ${KEYRING_PATH}" >&2
+    exit 1
+  fi
+
+  cat > "${LIST_PATH}" <<EOF
+# Managed by prefork-packages
+# ${REPO_LABEL}
+deb [signed-by=${KEYRING_PATH}] ${REPO_BASEURL} ${REPO_CODENAME} main
+EOF
+  chmod 0644 "${LIST_PATH}"
+}
+
+case "$1" in
+  configure|reconfigure)
+    resolve_distro
+    write_repo
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

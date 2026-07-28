@@ -1,0 +1,8 @@
+prefork-packages (1.0.0-1) unstable; urgency=medium
+
+  * Initial Debian/Ubuntu repository package.
+  * Detect distro at install-time and configure exactly one APT repo.
+  * Embed signing key statically in package payload.
+  * Configure APT with signed-by=/usr/share/keyrings/prefork-packages.asc.
+
+ -- Lennart Betz <lbetz@prefork.de>  Tue, 28 Jul 2026 14:35:00 +0200
