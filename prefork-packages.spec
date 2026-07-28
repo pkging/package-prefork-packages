@@ -44,3 +44,4 @@ EOF
 %changelog
 * Tue Jul 28 2026 Lennart Betz <lbetz@prefork.de> 1.0.0-1
 - Initial repository package for packages.private.prefork.de
+- Switch embedded repo key to Pulp signing public key

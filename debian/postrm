@@ -2,7 +2,7 @@
 
 set -e
 
-KEYRING_PATH="/etc/apt/keyrings/prefork-packages.asc"
+KEYRING_PATH="/usr/share/keyrings/prefork-packages.asc"
 LIST_PATH="/etc/apt/sources.list.d/prefork-packages.list"
 
 case "$1" in
