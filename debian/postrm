@@ -6,6 +6,9 @@ KEYRING_PATH="/usr/share/keyrings/prefork-packages.asc"
 LIST_PATH="/etc/apt/sources.list.d/prefork-packages.list"
 
 case "$1" in
+  remove)
+    rm -f "${LIST_PATH}"
+    ;;
   purge)
     rm -f "${LIST_PATH}" "${KEYRING_PATH}"
     ;;
