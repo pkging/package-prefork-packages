@@ -7,6 +7,7 @@ source /workspace/.ci-workflows/hooks/lib/common.sh || true
 RPM_REPO_FILE="/etc/yum.repos.d/prefork-packages.repo"
 RPM_KEY_FILE="/etc/pki/rpm-gpg/prefork-packages.asc"
 DEB_LIST_FILE="/etc/apt/sources.list.d/prefork-packages.list"
+DEB_SOURCES_FILE="/etc/apt/sources.list.d/prefork-packages.sources"
 DEB_KEY_FILE="/usr/share/keyrings/prefork-packages.asc"
 
 assert_file_exists() {
@@ -40,6 +41,19 @@ resolve_codename() {
   fi
 
   printf '%s' "$codename"
+}
+
+supports_deb822() {
+  local codename="$1"
+
+  case "$codename" in
+    buster|focal)
+      return 1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
 }
 
 log "Smoke test for prefork-packages on distro: $ID ($ID_LIKE), format: $PACKAGE_FORMAT"
@@ -79,11 +93,20 @@ if is_deb_based; then
     base_path="ubuntu"
   fi
 
-  assert_file_exists "$DEB_LIST_FILE"
   assert_file_exists "$DEB_KEY_FILE"
-
-  assert_file_contains "$DEB_LIST_FILE" "deb [signed-by=/usr/share/keyrings/prefork-packages.asc] https://packages.private.prefork.de/${base_path}/ ${codename} main"
   assert_file_contains "$DEB_KEY_FILE" "BEGIN PGP PUBLIC KEY BLOCK"
+
+  if supports_deb822 "$codename"; then
+    assert_file_exists "$DEB_SOURCES_FILE"
+    assert_file_contains "$DEB_SOURCES_FILE" "Types: deb"
+    assert_file_contains "$DEB_SOURCES_FILE" "URIs: https://packages.private.prefork.de/${base_path}/"
+    assert_file_contains "$DEB_SOURCES_FILE" "Suites: ${codename}"
+    assert_file_contains "$DEB_SOURCES_FILE" "Components: main"
+    assert_file_contains "$DEB_SOURCES_FILE" "Signed-By: /usr/share/keyrings/prefork-packages.asc"
+  else
+    assert_file_exists "$DEB_LIST_FILE"
+    assert_file_contains "$DEB_LIST_FILE" "deb [signed-by=/usr/share/keyrings/prefork-packages.asc] https://packages.private.prefork.de/${base_path}/ ${codename} main"
+  fi
 
   log "Smoke test passed for Debian/Ubuntu"
   exit 0

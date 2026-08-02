@@ -4,13 +4,14 @@ set -e
 
 KEYRING_PATH="/usr/share/keyrings/prefork-packages.asc"
 LIST_PATH="/etc/apt/sources.list.d/prefork-packages.list"
+SOURCES_PATH="/etc/apt/sources.list.d/prefork-packages.sources"
 
 case "$1" in
   remove)
-    rm -f "${LIST_PATH}"
+    rm -f "${LIST_PATH}" "${SOURCES_PATH}"
     ;;
   purge)
-    rm -f "${LIST_PATH}" "${KEYRING_PATH}"
+    rm -f "${LIST_PATH}" "${SOURCES_PATH}" "${KEYRING_PATH}"
     ;;
 esac
 

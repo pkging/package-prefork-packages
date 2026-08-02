@@ -4,6 +4,7 @@ set -e
 
 KEYRING_PATH="/usr/share/keyrings/prefork-packages.asc"
 LIST_PATH="/etc/apt/sources.list.d/prefork-packages.list"
+SOURCES_PATH="/etc/apt/sources.list.d/prefork-packages.sources"
 
 resolve_distro() {
   ID_VALUE=""
@@ -55,18 +56,44 @@ resolve_distro() {
   REPO_CODENAME="${CODENAME_VALUE}"
 }
 
+supports_deb822() {
+  case "${REPO_CODENAME}" in
+    buster|focal|jammy)
+      return 1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
 write_repo() {
   if [ ! -r "${KEYRING_PATH}" ]; then
     echo "Missing keyring file: ${KEYRING_PATH}" >&2
     exit 1
   fi
 
-  cat > "${LIST_PATH}" <<EOF
+  if supports_deb822; then
+    rm -f "${LIST_PATH}"
+    cat > "${SOURCES_PATH}" <<EOF
+# Managed by prefork-packages
+# ${REPO_LABEL}
+Types: deb
+URIs: ${REPO_BASEURL}
+Suites: ${REPO_CODENAME}
+Components: main
+Signed-By: ${KEYRING_PATH}
+EOF
+    chmod 0644 "${SOURCES_PATH}"
+  else
+    rm -f "${SOURCES_PATH}"
+    cat > "${LIST_PATH}" <<EOF
 # Managed by prefork-packages
 # ${REPO_LABEL}
 deb [signed-by=${KEYRING_PATH}] ${REPO_BASEURL} ${REPO_CODENAME} main
 EOF
-  chmod 0644 "${LIST_PATH}"
+    chmod 0644 "${LIST_PATH}"
+  fi
 }
 
 case "$1" in
