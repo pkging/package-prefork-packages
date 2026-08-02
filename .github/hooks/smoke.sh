@@ -47,7 +47,7 @@ supports_deb822() {
   local codename="$1"
 
   case "$codename" in
-    buster|focal)
+    buster|focal|jammy)
       return 1
       ;;
     *)
