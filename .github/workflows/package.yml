@@ -1,4 +1,4 @@
-name: Build package-openvox-agent-ansi
+name: Build package-prefork-packages
 
 on:
   push:
@@ -13,6 +13,9 @@ jobs:
     with:
       ci_workflows_ref: "main"
       runner_labels: '["self-hosted","pkging"]'
+      source_event_name: ${{ github.event_name }}
+      source_ref_name: ${{ github.ref_name }}
+      source_ref_type: ${{ github.ref_type }}
       matrix: |
         el8: x86_64
         el9: x86_64
